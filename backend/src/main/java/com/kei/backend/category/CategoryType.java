@@ -1,13 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Enum.java to edit this template
- */
 package com.kei.backend.category;
 
-/**
- *
- * @author LENOVO
- */
+/** INCOME = khoan thu, EXPENSE = khoan chi. */
 public enum CategoryType {
     INCOME,
     EXPENSE
