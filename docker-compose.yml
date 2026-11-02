@@ -1,3 +1,7 @@
+# Dev hang ngay:     docker compose up -d                    (chi bat PostgreSQL)
+# Chay ca he thong:  docker compose --profile full up -d --build
+#                    roi mo http://localhost:8088
+
 services:
   db:
     image: postgres:17
@@ -7,9 +11,35 @@ services:
       POSTGRES_USER: expenditure
       POSTGRES_PASSWORD: expenditure
     ports:
-      - "5434:5432"
+      - "5434:5432" # 5432, 5433 tren may nay da co PostgreSQL khac dung
     volumes:
       - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U expenditure -d expenditure"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    profiles: ["full"]
+    build: ./backend
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/expenditure
+      DB_USERNAME: expenditure
+      DB_PASSWORD: expenditure
+      JWT_SECRET: ${JWT_SECRET:-local-docker-secret-change-me-0123456789}
+      CORS_ORIGINS: http://localhost:8088
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    profiles: ["full"]
+    build: ./frontend
+    ports:
+      - "8088:80"
+    depends_on:
+      - backend
 
 volumes:
   db-data:

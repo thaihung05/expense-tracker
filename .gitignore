@@ -1,0 +1,14 @@
+# Bien moi truong / mat khau that: khong dua len GitHub
+.env
+.env.*
+*.local.md
+
+# IDE
+.idea/
+*.iml
+nbproject/private/
+.vscode/
+
+# He dieu hanh
+.DS_Store
+Thumbs.db
