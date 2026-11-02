@@ -1,0 +1,33 @@
+# Render Blueprint: Render doc file nay de tao backend tu dong.
+# Huong dan day du: docs/DEPLOY.md
+services:
+  - type: web
+    name: expense-tracker-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    # Chi build lai khi code backend thay doi
+    buildFilter:
+      paths:
+        - backend/**
+    envVars:
+      # 3 bien database: dan tu Neon (xem docs/DEPLOY.md)
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # Render tu sinh khoa ngau nhien, khong ai can biet gia tri nay
+      - key: JWT_SECRET
+        generateValue: true
+      # Domain frontend tren Vercel, vd https://expense-tracker-xxx.vercel.app
+      - key: CORS_ORIGINS
+        sync: false
+      # Goi mien phi chi co 512MB RAM
+      - key: JAVA_OPTS
+        value: -XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Duser.timezone=UTC

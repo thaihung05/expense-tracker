@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { ApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { SLOW_SERVER_TEXT, useSlowHint } from '../lib/useSlowHint'
 
 export function LoginPage() {
   const { login, register } = useAuth()
@@ -12,6 +13,7 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
+  const slow = useSlowHint(busy)
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -74,6 +76,7 @@ export function LoginPage() {
         <button className="btn btn--primary btn--block" type="submit" disabled={busy}>
           {busy ? 'Đang xử lý…' : isRegister ? 'Tạo tài khoản' : 'Đăng nhập'}
         </button>
+        {slow && <p className="muted small" role="status">{SLOW_SERVER_TEXT}</p>}
 
         <p className="auth__switch">
           {isRegister ? 'Đã có tài khoản?' : 'Chưa có tài khoản?'}{' '}

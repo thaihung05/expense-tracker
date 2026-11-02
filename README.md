@@ -123,6 +123,10 @@ docker compose --profile full up -d --build
 
 Mở http://localhost:8088. Nginx phục vụ giao diện và chuyển `/api` sang backend.
 
+### Deploy miễn phí
+
+Neon (database) + Render (backend) + Vercel (frontend), cấu hình sẵn trong [`render.yaml`](render.yaml) và [`frontend/vercel.json`](frontend/vercel.json). Hướng dẫn từng bước: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+
 ### Biến môi trường (khi deploy)
 
 | Biến | Ý nghĩa |

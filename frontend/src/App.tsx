@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 import { Layout } from './components/Layout'
 import { useAuth } from './lib/auth'
+import { SLOW_SERVER_TEXT, useSlowHint } from './lib/useSlowHint'
 import { MonthProvider } from './lib/month'
 import { BudgetsPage } from './pages/BudgetsPage'
 import { HomePage } from './pages/HomePage'
@@ -14,9 +15,15 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage').then((m) => ({ defa
 
 export default function App() {
   const { user, loading } = useAuth()
+  const slow = useSlowHint(loading)
 
   if (loading) {
-    return <div className="splash" aria-busy="true">Đang mở sổ…</div>
+    return (
+      <div className="splash" aria-busy="true">
+        <p>Đang mở sổ…</p>
+        {slow && <p className="small">{SLOW_SERVER_TEXT}</p>}
+      </div>
+    )
   }
 
   if (!user) {
