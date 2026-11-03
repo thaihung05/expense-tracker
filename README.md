@@ -2,6 +2,10 @@
 
 Ứng dụng quản lý thu chi cá nhân, ưu tiên dùng trên điện thoại. Điểm khác biệt: **gõ một câu như nhắn tin** (`cafe 35k hôm qua`), app tự hiểu số tiền, ngày và danh mục, rồi **tự học** thói quen ghi chép của bạn.
 
+**🔗 Dùng thử:** https://expense-tracker-indol-pi.vercel.app  ·  **Tài liệu API (Swagger):** https://expense-tracker-api-ozdp.onrender.com/swagger-ui.html
+
+> Backend chạy gói miễn phí của Render nên tự "ngủ" khi không có ai dùng: lần mở đầu tiên có thể mất khoảng 1 phút để khởi động. Mở trên điện thoại rồi chọn *Thêm vào màn hình chính* để cài như app.
+
 <p>
   <img src="docs/screenshots/1-nhap-nhanh.jpg" width="240" alt="Gõ nhanh 'grab 52k hôm qua', app in ra biên lai với danh mục Đi lại">
   <img src="docs/screenshots/2-bao-cao.jpg" width="240" alt="Báo cáo tháng: tổng thu chi, biểu đồ chi theo ngày, chi theo danh mục">
