@@ -131,7 +131,8 @@ Neon (database) + Render (backend) + Vercel (frontend), cấu hình sẵn trong 
 
 | Biến | Ý nghĩa |
 |---|---|
-| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Kết nối PostgreSQL |
+| `DATABASE_URL` | Chuỗi kết nối kiểu `postgresql://user:pass@host/db` (Neon, Render...). Backend tự đổi sang JDBC |
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Hoặc khai báo tách riêng (ưu tiên hơn `DATABASE_URL`) |
 | `JWT_SECRET` | Khóa ký token, **bắt buộc đổi**, tối thiểu 32 ký tự |
 | `CORS_ORIGINS` | Domain frontend được phép gọi API (nếu frontend deploy ở domain khác) |
 | `VITE_API_URL` | (frontend, lúc build) địa chỉ backend nếu khác domain |

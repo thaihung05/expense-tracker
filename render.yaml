@@ -15,12 +15,9 @@ services:
       paths:
         - backend/**
     envVars:
-      # 3 bien database: dan tu Neon (xem docs/DEPLOY.md)
-      - key: DB_URL
-        sync: false
-      - key: DB_USERNAME
-        sync: false
-      - key: DB_PASSWORD
+      # Chuoi ket noi Neon, dan nguyen ban: postgresql://user:pass@host/neondb?sslmode=require
+      # (backend tu doi sang dang JDBC, xem DatabaseUrlEnvironmentPostProcessor)
+      - key: DATABASE_URL
         sync: false
       # Render tu sinh khoa ngau nhien, khong ai can biet gia tri nay
       - key: JWT_SECRET
