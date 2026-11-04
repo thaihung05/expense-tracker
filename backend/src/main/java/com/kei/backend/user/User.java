@@ -29,14 +29,23 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    /** Thoi diem va phien ban Chinh sach quyen rieng tu ma nguoi dung da dong y. */
+    @Column(name = "privacy_accepted_at")
+    private Instant privacyAcceptedAt;
+
+    @Column(name = "privacy_version", length = 20)
+    private String privacyVersion;
+
     protected User() {
     }
 
-    public User(String email, String passwordHash, String displayName) {
+    public User(String email, String passwordHash, String displayName, String privacyVersion) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.displayName = displayName;
         this.createdAt = Instant.now();
+        this.privacyAcceptedAt = this.createdAt;
+        this.privacyVersion = privacyVersion;
     }
 
     public Long getId() { return id; }
@@ -44,4 +53,6 @@ public class User {
     public String getPasswordHash() { return passwordHash; }
     public String getDisplayName() { return displayName; }
     public Instant getCreatedAt() { return createdAt; }
+    public Instant getPrivacyAcceptedAt() { return privacyAcceptedAt; }
+    public String getPrivacyVersion() { return privacyVersion; }
 }

@@ -24,6 +24,12 @@ public class AuthController {
         this.authService = authService;
     }
 
+    /** Khong can dang nhap: frontend dung de biet co hien nut "Tao tai khoan" hay khong. */
+    @GetMapping("/config")
+    public AuthDtos.PublicConfig config() {
+        return authService.publicConfig();
+    }
+
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {

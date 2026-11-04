@@ -15,6 +15,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     List<Category> findByUserIdIsNull();
 
+    List<Category> findByUserIdOrderById(Long userId);
+
     @Query("select count(t) > 0 from Transaction t where t.category.id = :categoryId")
     boolean isUsedByTransactions(Long categoryId);
 }

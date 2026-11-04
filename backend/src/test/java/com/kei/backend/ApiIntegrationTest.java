@@ -35,7 +35,11 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
  * Test tich hop: goi API qua tang HTTP, chay voi PostgreSQL that (Testcontainers).
  * "Hom nay" duoc co dinh la 15/11/2026 de ket qua test khong phu thuoc ngay chay.
  */
-@SpringBootTest
+@SpringBootTest(properties = {
+    // test goi dang ky/dang nhap lien tuc: noi rong gioi han (gioi han duoc test rieng trong RateLimitIntegrationTest)
+    "app.rate-limit.auth-per-minute=100000",
+    "app.rate-limit.login-per-email=100000"
+})
 @AutoConfigureMockMvc
 @Import({TestcontainersConfiguration.class, ApiIntegrationTest.FixedClock.class})
 class ApiIntegrationTest {
@@ -90,7 +94,7 @@ class ApiIntegrationTest {
         register(email);
 
         mvc.perform(json(post("/api/auth/register"),
-                        Map.of("email", email, "password", "matkhau123", "displayName", "B")))
+                        Map.of("email", email, "password", "matkhau123", "displayName", "B", "acceptedPrivacy", true)))
                 .andExpect(status().isConflict());
         mvc.perform(json(post("/api/auth/login"), Map.of("email", email, "password", "sai-mat-khau")))
                 .andExpect(status().isUnauthorized());
@@ -102,7 +106,68 @@ class ApiIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.email").exists())
                 .andExpect(jsonPath("$.errors.password").exists())
-                .andExpect(jsonPath("$.errors.displayName").exists());
+                .andExpect(jsonPath("$.errors.displayName").exists())
+                .andExpect(jsonPath("$.errors.acceptedPrivacy").exists());
+    }
+
+    // ---------- Quyen rieng tu (Luat 91/2025/QH15) ----------
+
+    @Test
+    void registrationRequiresExplicitConsent() throws Exception {
+        String email = "consent-" + UUID.randomUUID() + "@test.vn";
+        mvc.perform(json(post("/api/auth/register"),
+                        Map.of("email", email, "password", "matkhau123", "displayName", "A", "acceptedPrivacy", false)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.acceptedPrivacy").exists());
+        mvc.perform(json(post("/api/auth/register"),
+                        Map.of("email", email, "password", "matkhau123", "displayName", "A")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.acceptedPrivacy").exists());
+    }
+
+    @Test
+    void publicConfigNeedsNoLogin() throws Exception {
+        mvc.perform(get("/api/auth/config"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.registrationEnabled").value(true))
+                .andExpect(jsonPath("$.privacyVersion").isNotEmpty());
+    }
+
+    @Test
+    void exportContainsAllMyDataButNoPassword() throws Exception {
+        createTransaction(35_000, categoryId("Ăn uống"), "2026-11-14", "cafe", true);
+
+        String body = mvc.perform(auth(get("/api/account/export")))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", "attachment; filename=\"du-lieu-cua-toi.json\""))
+                .andExpect(jsonPath("$.account.privacyVersion").isNotEmpty())
+                .andExpect(jsonPath("$.account.privacyAcceptedAt").isNotEmpty())
+                .andExpect(jsonPath("$.transactions[0].note").value("cafe"))
+                .andExpect(jsonPath("$.learnedKeywords[0].keyword").value("cafe"))
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        assertThat(body).doesNotContainIgnoringCase("password\"").doesNotContain("{bcrypt}");
+    }
+
+    @Test
+    void deleteAccountRemovesEverything() throws Exception {
+        String email = "delete-" + UUID.randomUUID() + "@test.vn";
+        String myToken = register(email);
+        long food = categoryIdFor("Ăn uống", myToken);
+        mvc.perform(json(auth(post("/api/transactions"), myToken),
+                Map.of("amount", 35_000, "categoryId", food, "occurredOn", "2026-11-14", "note", "cafe", "learnKeyword", true)));
+        mvc.perform(json(auth(put("/api/budgets"), myToken), Map.of("categoryId", food, "limit", 100_000)));
+        mvc.perform(json(auth(post("/api/categories"), myToken), Map.of("name", "Riêng", "type", "EXPENSE")));
+
+        mvc.perform(json(auth(post("/api/account/delete"), myToken), Map.of("password", "sai-mat-khau")))
+                .andExpect(status().isBadRequest());
+        mvc.perform(json(auth(post("/api/account/delete"), myToken), Map.of("password", "matkhau123")))
+                .andExpect(status().isNoContent());
+
+        mvc.perform(auth(get("/api/auth/me"), myToken)).andExpect(status().isUnauthorized());
+        mvc.perform(json(post("/api/auth/login"), Map.of("email", email, "password", "matkhau123")))
+                .andExpect(status().isUnauthorized());
+        // Email duoc giai phong: dang ky lai tu dau duoc
+        register(email);
     }
 
     // ---------- Giao dich ----------
@@ -263,14 +328,18 @@ class ApiIntegrationTest {
 
     private String register(String email) throws Exception {
         String body = mvc.perform(json(post("/api/auth/register"),
-                        Map.of("email", email, "password", "matkhau123", "displayName", "Test")))
+                        Map.of("email", email, "password", "matkhau123", "displayName", "Test", "acceptedPrivacy", true)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return JsonPath.read(body, "$.token");
     }
 
     private long categoryId(String name) throws Exception {
-        String body = mvc.perform(auth(get("/api/categories")))
+        return categoryIdFor(name, token);
+    }
+
+    private long categoryIdFor(String name, String jwt) throws Exception {
+        String body = mvc.perform(auth(get("/api/categories"), jwt))
                 .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
         List<Integer> ids = JsonPath.read(body, "$[?(@.name == '" + name + "')].id");
         return ids.getFirst();

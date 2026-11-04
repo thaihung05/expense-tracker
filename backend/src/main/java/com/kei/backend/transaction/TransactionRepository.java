@@ -43,4 +43,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @EntityGraph(attributePaths = "category")
     Optional<Transaction> findByIdAndUserId(Long id, Long userId);
+
+    /** Toan bo giao dich cua 1 nguoi (dung cho "Tai toan bo du lieu cua toi"). */
+    @EntityGraph(attributePaths = "category")
+    List<Transaction> findByUserIdOrderByOccurredOnAscIdAsc(Long userId);
 }

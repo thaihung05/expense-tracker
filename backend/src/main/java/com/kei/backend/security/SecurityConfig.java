@@ -8,6 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -31,7 +32,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_PATHS = {
-        "/api/auth/register", "/api/auth/login", "/api/ping",
+        "/api/auth/register", "/api/auth/login", "/api/auth/config", "/api/ping",
         "/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error"
     };
 
@@ -54,10 +55,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecretKey jwtSecretKey(AppProperties props) {
-        byte[] bytes = props.jwt().secret().getBytes(StandardCharsets.UTF_8);
+    SecretKey jwtSecretKey(AppProperties props, Environment env) {
+        String secret = props.jwt().secret();
+        byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 32) {
             throw new IllegalStateException("app.jwt.secret phai dai it nhat 32 ky tu");
+        }
+        // Khoa mac dinh nam cong khai tren GitHub: ai cung tao duoc token gia neu dung no khi chay that.
+        // Chi cho phep khi database o tren chinh may nay (moi truong dev / test).
+        String dbUrl = env.getProperty("spring.datasource.url", "");
+        boolean localDatabase = dbUrl.contains("://localhost") || dbUrl.contains("://127.0.0.1");
+        if (secret.startsWith("dev-only-") && !localDatabase) {
+            throw new IllegalStateException("Dang dung JWT_SECRET mac dinh voi database that. Hay dat bien moi truong JWT_SECRET.");
         }
         return new SecretKeySpec(bytes, "HmacSHA256");
     }
