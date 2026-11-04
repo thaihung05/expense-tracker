@@ -1,0 +1,21 @@
+name: Keep backend awake
+
+# Goi mien phi cua Render tat backend sau 15 phut khong ai dung, lan mo sau phai cho ~1 phut.
+# Cu 10 phut goi /api/ping 1 lan de backend luon thuc.
+# /api/ping chi tra ve "pong": khong dung database (Neon van duoc ngu), khong lo du lieu.
+# Luu y: GitHub tu tat lich chay neu repo 60 ngay khong co commit nao.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # cho phep bam "Run workflow" de chay tay
+
+permissions: {} # khong can quyen gi tren repo
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping backend
+        run: curl -fsS --retry 3 --retry-delay 20 --max-time 120 https://expense-tracker-api-ozdp.onrender.com/api/ping

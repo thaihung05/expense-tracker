@@ -9,8 +9,15 @@ import '@fontsource/be-vietnam-pro/800.css'
 import '@fontsource/jetbrains-mono/500.css'
 import './index.css'
 import App from './App.tsx'
+import { warmUpServer } from './lib/api'
 import { AuthProvider } from './lib/auth'
 import { ToastProvider } from './lib/toast'
+
+// Danh thuc backend som: ngay khi mo trang, va khi quay lai app (vd mo lai app da cai tren dien thoai).
+warmUpServer()
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') warmUpServer()
+})
 
 const queryClient = new QueryClient({
   defaultOptions: {

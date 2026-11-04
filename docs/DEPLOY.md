@@ -72,6 +72,12 @@ Làm theo đúng thứ tự: **Neon → Render → Vercel → quay lại Render 
 
 ---
 
+## Giữ backend luôn thức (đỡ chờ ~1 phút)
+
+- Workflow [`keep-alive.yml`](../.github/workflows/keep-alive.yml) gọi `/api/ping` mỗi 10 phút, nên Render không đủ 15 phút rảnh để ngủ. `/api/ping` không đụng database: Neon vẫn ngủ bình thường, không tốn giờ chạy.
+- Frontend cũng gọi `/api/ping` ngay khi mở trang, để backend khởi động sớm trong lúc bạn đang đăng nhập.
+- GitHub tự tắt lịch chạy nếu repo **60 ngày không có commit**, lúc đó vào tab Actions bật lại. Muốn chắc chắn hơn, thêm một lịch gọi cùng địa chỉ trên https://cron-job.org (miễn phí).
+
 ## Từ giờ, cập nhật app thế nào?
 
 Chỉ cần `git push` lên `main`: Render tự build lại backend (khi thư mục `backend/` đổi), Vercel tự build lại frontend.

@@ -83,6 +83,20 @@ export async function api<T>(path: string, method: Method = 'GET', body?: unknow
   return (await res.json()) as T
 }
 
+let lastWarmUp = 0
+
+/**
+ * Goi /api/ping (khong can dang nhap, khong dung database) de backend dang "ngu" tren goi mien phi
+ * bat dau khoi dong ngay, trong luc nguoi dung con dang go email / mat khau.
+ * Khong cho ket qua, loi thi bo qua. Toi da 1 lan moi phut.
+ */
+export function warmUpServer() {
+  const now = Date.now()
+  if (now - lastWarmUp < 60_000) return
+  lastWarmUp = now
+  fetch(`${BASE_URL}/api/ping`, { cache: 'no-store' }).catch(() => {})
+}
+
 /** Tai file (vd CSV) kem token, roi kich hoat "luu file" tren trinh duyet. */
 export async function download(path: string, fallbackName: string) {
   const res = await send(path, 'GET')
