@@ -7,6 +7,7 @@ import { MonthProvider } from './lib/month'
 import { BudgetsPage } from './pages/BudgetsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import { PrivacyPage } from './pages/PrivacyPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { TransactionsPage } from './pages/TransactionsPage'
 
@@ -29,6 +30,7 @@ export default function App() {
   if (!user) {
     return (
       <Routes>
+        <Route path="quyen-rieng-tu" element={<PrivacyPage />} />
         <Route path="*" element={<LoginPage />} />
       </Routes>
     )
@@ -37,6 +39,7 @@ export default function App() {
   return (
     <MonthProvider>
       <Routes>
+        <Route path="quyen-rieng-tu" element={<PrivacyPage />} />
         <Route element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="giao-dich" element={<TransactionsPage />} />

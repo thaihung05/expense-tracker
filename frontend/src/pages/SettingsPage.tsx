@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Icon } from '../components/Icon'
-import { ApiError } from '../lib/api'
+import { Link } from 'react-router'
+import { api, ApiError, download } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { useCategories, useCreateCategory, useDeleteCategory } from '../lib/queries'
 import { useToast } from '../lib/toast'
@@ -112,6 +113,84 @@ export function SettingsPage() {
           {error && <p className="form-error" role="alert">{error}</p>}
         </form>
       </section>
+      <YourDataSection />
     </>
+  )
+}
+
+/**
+ * Quyen cua nguoi dung voi du lieu ca nhan (Luat 91/2025/QH15):
+ * tai ve toan bo du lieu, xoa tai khoan (= rut lai su dong y + xoa vinh vien).
+ */
+function YourDataSection() {
+  const { logout } = useAuth()
+  const toast = useToast()
+  const [confirming, setConfirming] = useState(false)
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function onExport() {
+    try {
+      await download('/api/account/export', 'du-lieu-cua-toi.json')
+    } catch {
+      toast('Không tải được dữ liệu, thử lại sau', 'error')
+    }
+  }
+
+  async function onDelete(e: FormEvent) {
+    e.preventDefault()
+    if (!window.confirm('Xóa vĩnh viễn tài khoản và TOÀN BỘ dữ liệu? Không thể khôi phục.')) return
+    setBusy(true)
+    setError(null)
+    try {
+      await api<void>('/api/account/delete', 'POST', { password })
+      logout()
+      toast('Đã xóa tài khoản và toàn bộ dữ liệu')
+    } catch (err) {
+      setError(err instanceof ApiError ? Object.values(err.fieldErrors)[0] ?? err.message : 'Không xóa được')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section className="card" aria-labelledby="data-title">
+      <header className="card__head"><h2 id="data-title">Dữ liệu của bạn</h2></header>
+      <p className="muted small">
+        Bạn có quyền xem, tải về và xóa toàn bộ dữ liệu của mình.{' '}
+        <Link to="/quyen-rieng-tu">Chính sách quyền riêng tư</Link>
+      </p>
+      <button className="btn btn--ghost btn--block" onClick={onExport}>
+        <Icon name="download" size={18} /> Tải toàn bộ dữ liệu (JSON)
+      </button>
+
+      {!confirming ? (
+        <button className="btn btn--ghost btn--danger btn--block" onClick={() => setConfirming(true)}>
+          <Icon name="trash" size={18} /> Xóa tài khoản
+        </button>
+      ) : (
+        <form className="danger-zone" onSubmit={onDelete}>
+          <p className="small">
+            Tài khoản, mọi giao dịch, ngân sách, danh mục riêng và từ khóa đã học sẽ bị <strong>xóa vĩnh viễn</strong>.
+            Nên tải dữ liệu về trước.
+          </p>
+          <label className="field" htmlFor="delete-password">
+            <span className="field__label">Nhập mật khẩu để xác nhận</span>
+            <input id="delete-password" type="password" value={password} autoComplete="current-password"
+              onChange={(e) => setPassword(e.target.value)} required />
+          </label>
+          {error && <p className="form-error" role="alert">{error}</p>}
+          <div className="sheet__actions">
+            <button type="button" className="btn btn--ghost" onClick={() => { setConfirming(false); setPassword('') }}>
+              Hủy
+            </button>
+            <button type="submit" className="btn btn--primary btn--destructive" disabled={busy || !password}>
+              {busy ? 'Đang xóa…' : 'Xóa vĩnh viễn'}
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
   )
 }

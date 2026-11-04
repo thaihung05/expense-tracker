@@ -91,3 +91,8 @@ export interface AuthResponse {
   token: string
   user: User
 }
+
+export interface PublicConfig {
+  registrationEnabled: boolean
+  privacyVersion: string
+}

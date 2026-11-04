@@ -1357,3 +1357,86 @@ button:disabled {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------- Quyen rieng tu: o dong y, trang chinh sach, xoa tai khoan ---------- */
+
+.consent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.consent__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+
+.consent__row input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--brand);
+}
+
+.consent__row a,
+.auth__foot a,
+.doc a {
+  color: var(--brand);
+  font-weight: 500;
+}
+
+.auth__foot {
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.doc {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: calc(20px + env(safe-area-inset-top)) 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  line-height: 1.65;
+}
+
+.doc h1 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.doc h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.doc ul {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.doc li + li {
+  margin-top: 4px;
+}
+
+.danger-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1.5px solid color-mix(in srgb, var(--over) 45%, transparent);
+  border-radius: var(--radius-sm);
+}
+
+.btn--destructive {
+  background: var(--over);
+  color: #fff;
+}
